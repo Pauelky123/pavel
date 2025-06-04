@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PavelPA - Обо мне</title>
+<style>
+  body, html {
+    margin: 0; padding: 0; height: 100%;
+    background: black;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+  }
+  #stars {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+  }
+  .container {
+    max-width: 900px;
+    margin: 100px auto;
+    padding: 20px 40px;
+    border: 2px solid white;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.05);
+    opacity: 0;
+    animation: fadeIn 1.5s forwards;
+  }
+  h2 {
+    text-align: center;
+    font-size: 36px;
+    margin-bottom: 30px;
+  }
+  #typing-text {
+    font-size: 20px;
+    line-height: 1.7;
+    white-space: pre-wrap;
+  }
+  nav {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  nav a {
+    margin: 0 15px;
+    text-decoration: none;
+    color: white;
+    font-weight: bold;
+    border: 2px solid white;
+    padding: 10px 20px;
+    border-radius: 12px;
+    transition: background-color 0.3s, color 0.3s, transform 0.3s;
+  }
+  nav a:hover {
+    background-color: white;
+    color: black;
+    transform: scale(1.1);
+  }
+  @keyframes fadeIn {
+    to {opacity:1;}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="stars"></canvas>
+
+<nav>
+  <a href="index.html">Главная</a>
+  <a href="https://www.tiktok.com/@pauelky" target="_blank" rel="noopener noreferrer">TikTok</a>
+  <a href="https://t.me/username_pasha_Bot" target="_blank" rel="noopener noreferrer">Telegram-бот</a>
+</nav>
+
+<div class="container">
+  <h2>Обо мне</h2>
+  <p id="typing-text"></p>
+</div>
+
+<script>
+const aboutText = `Привет! Меня зовут Павел, и я живу с огнём в сердце и страстью к технике. Моя любовь к квадроциклам родилась с первых минут за рулём — ощущение свободы и адреналина не сравнимо ни с чем. Но техника для меня — не только железо и скорость, это возможность создавать, исследовать и постоянно учиться новому. Я человек, который ценит каждое мгновение, стремлюсь к совершенству и всегда ищу вызовы, чтобы стать лучше. Эта страсть вдохновляет меня двигаться вперёд и открывать для себя новые горизонты. Переходите и Подписывайтесь на мои соцсети, спасибо.`;
+
+const typingElement = document.getElementById('typing-text');
+let index = 0;
+
+function type() {
+  if (index < aboutText.length) {
+    typingElement.textContent += aboutText.charAt(index);
+    index++;
+    setTimeout(type, 50);
+  }
+}
+
+type();
+
+const canvas = document.getElementById('stars');
+const ctx = canvas.getContext('2d');
+let w, h;
+let stars = [];
+
+function init() {
+  w = window.innerWidth;
+  h = window.innerHeight;
+  canvas.width = w;
+  canvas.height = h;
+
+  stars = [];
+  for(let i=0; i<200; i++) {
+    stars.push({
+      x: Math.random() * w,
+      y: Math.random() * h,
+      radius: Math.random() * 1.2,
+      alpha: Math.random()
+    });
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, w, h);
+  for(let i=0; i<stars.length; i++) {
+    let s = stars[i];
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.radius, 0, 2 * Math.PI);
+    ctx.fillStyle = `rgba(255,255,255,${s.alpha})`;
+    ctx.fill();
+    s.alpha += (Math.random() - 0.5) * 0.05;
+    if (s.alpha < 0) s.alpha = 0;
+    if (s.alpha > 1) s.alpha = 1;
+  }
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener('resize', init);
+init();
+draw();
+</script>
+
+</body>
+</html>
