@@ -1,0 +1,12 @@
+{
+  "provider": "Coin Metrics community data",
+  "url": "https://raw.githubusercontent.com/coinmetrics/data/f1a36afb962731c387bb03982758ab0103063da5/csv/btc.csv",
+  "upstream_sha256": "06495ff8e643432e6948b7b4686ce44fc106217287dabdc1b38351d9ddec46c3",
+  "dataset_sha256": "381776f67c1377607228e527c07b1ce65b7650d718d1fcbe13156bd839b0833d",
+  "field": "PriceUSD",
+  "first": "2022-01-01",
+  "last": "2026-05-23",
+  "observations": 1604,
+  "note": "Дневные справочные цены, не OHLC или цены исполнения Coinbase. CC BY 4.0, атрибуция Coin Metrics.",
+  "license": "https://creativecommons.org/licenses/by/4.0/"
+}
