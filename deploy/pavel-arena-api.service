@@ -1,0 +1,25 @@
+[Unit]
+Description=Pavel Arena read-only HTTP API
+After=network.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=arena
+Group=arena
+WorkingDirectory=/opt/pavel
+Environment=ARENA_DB=/var/lib/pavel-arena/arena.sqlite3
+Environment=ARENA_HOST=127.0.0.1
+Environment=ARENA_PORT=8000
+ExecStart=/usr/bin/python3 -m arena.api
+Restart=always
+RestartSec=5
+StateDirectory=pavel-arena
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/pavel-arena
+
+[Install]
+WantedBy=multi-user.target

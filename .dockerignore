@@ -1,0 +1,8 @@
+.git
+.env
+runtime
+artifacts
+__pycache__
+*.sqlite*
+savedbot
+node_modules

@@ -1,0 +1,24 @@
+[Unit]
+Description=Pavel Arena paper trading worker
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=arena
+Group=arena
+WorkingDirectory=/opt/pavel
+Environment=ARENA_DB=/var/lib/pavel-arena/arena.sqlite3
+ExecStart=/usr/bin/python3 -m arena.worker
+Restart=always
+RestartSec=5
+StateDirectory=pavel-arena
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/lib/pavel-arena
+
+[Install]
+WantedBy=multi-user.target

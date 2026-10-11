@@ -1,0 +1,45 @@
+name: pavel-arena
+x-common: &common
+  image: pavel-arena:local
+  build: .
+  restart: unless-stopped
+  init: true
+  volumes:
+    - arena-data:/data
+  environment:
+    ARENA_DB: /data/arena.sqlite3
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+  read_only: true
+  tmpfs:
+    - /tmp:size=16m
+  logging:
+    driver: json-file
+    options:
+      max-size: 10m
+      max-file: '3'
+services:
+  api:
+    <<: *common
+    command: [python, -m, arena.api]
+    ports:
+      - '127.0.0.1:8000:8000'
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/live',timeout=5)"]
+      interval: 30s
+      timeout: 8s
+      retries: 3
+      start_period: 10s
+  worker:
+    <<: *common
+    command: [python, -m, arena.worker]
+    healthcheck:
+      test: [CMD, python, -m, arena.health]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+volumes:
+  arena-data:
