@@ -60,7 +60,10 @@ class CoinbaseMarket:
         ticker = self._get('/products/BTC-USD/ticker')
         rows = self._get('/products/BTC-USD/candles?granularity=86400')
         now = time.time()
-        quote = Quote('coinbase:' + str(ticker['trade_id']), datetime.fromisoformat(ticker['time'].replace('Z', '+00:00')).timestamp(),
+        # Best bid/ask can change without a new trade. Identify the full observed
+        # book snapshot so protective exits still react to spread movements.
+        quote_id = f"coinbase:{ticker['trade_id']}:{float(ticker['bid'])}:{float(ticker['ask'])}"
+        quote = Quote(quote_id, datetime.fromisoformat(ticker['time'].replace('Z', '+00:00')).timestamp(),
                       float(ticker['price']), float(ticker['bid']), float(ticker['ask']))
         candles = sorted((Candle(float(r[0]), float(r[4])) for r in rows if float(r[0]) + DAY <= now), key=lambda c: c.time)
         validate(quote, candles, now)

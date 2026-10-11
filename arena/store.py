@@ -5,7 +5,7 @@ import sqlite3
 import time
 from contextlib import contextmanager
 from pathlib import Path
-from .engine import INITIAL_CASH, decide
+from .engine import FEE, INITIAL_CASH, SLIPPAGE, decide
 from .market import validate
 from .strategies import STRATEGIES
 
@@ -19,6 +19,9 @@ class Store:
         self.path = str(path or db_path())
         Path(self.path).parent.mkdir(parents=True, exist_ok=True)
         with self.connection() as db:
+            version = db.execute('PRAGMA user_version').fetchone()[0]
+            if version not in (0, 1):
+                raise RuntimeError(f'Unsupported database schema version {version}; refusing to modify it')
             db.execute('PRAGMA journal_mode=WAL')
             db.executescript('''
                 CREATE TABLE IF NOT EXISTS agents(id TEXT PRIMARY KEY, state TEXT NOT NULL);
@@ -146,7 +149,7 @@ class Store:
         cycle_fresh = bool(meta.get('last_cycle') and 0 <= now-meta['last_cycle'] <= 90)
         ready = worker_alive and cycle_fresh and quote_fresh and not meta.get('current_error')
         status = 'running' if ready else ('blocked' if worker_alive else 'offline')
-        return dict(mode='paper', symbol='BTC-USD', initial_cash=INITIAL_CASH, server_time=now,
+        return dict(mode='paper', symbol='BTC-USD', initial_cash=INITIAL_CASH, fee_rate=FEE, slippage_rate=SLIPPAGE, server_time=now,
                     system=dict(status=status, ready=ready, worker_alive=worker_alive,
                                 quote_fresh=quote_fresh, cycle_fresh=cycle_fresh, **meta),
                     agents=agents, trades=trades, errors=errors)

@@ -1,0 +1,43 @@
+name: Paper arena checks
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  trading-and-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Trading, storage, crashes and independent processes
+        run: python -m unittest discover -s tests -v
+      - name: Reproduce historical report
+        run: |
+          python -m arena.backtest
+          git diff --exit-code -- data/backtest.json
+      - name: Check frontend and deployment config
+        run: |
+          node --check arena/static/app.js
+          docker compose config --quiet
+      - name: Browser dependencies (test only)
+        run: |
+          pip install playwright==1.58.0
+          python -m playwright install --with-deps chromium
+      - name: Desktop, mobile, trade UI and API recovery
+        run: python tests/browser_check.py
+      - name: Build non-root image
+        run: docker build -t pavel-arena:check .
+      - name: Image reads app and initializes persistent storage
+        run: docker run --rm pavel-arena:check python -c "from arena.store import Store; from arena.api import make_handler; assert len(Store().snapshot()['agents']) == 3"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: arena-browser-checks
+          path: artifacts/

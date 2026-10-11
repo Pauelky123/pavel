@@ -1,3 +1,4 @@
+import csv
 import json
 import tempfile
 import unittest
@@ -7,7 +8,7 @@ from pathlib import Path
 from unittest.mock import patch
 from arena.backtest import replay
 from arena.engine import FEE, SLIPPAGE, decide, initial_state
-from arena.market import Candle, DAY, Quote, validate
+from arena.market import Candle, CoinbaseMarket, DAY, Quote, validate
 from arena.store import Store
 from arena.strategies import STRATEGIES, signal
 from arena.worker import Worker
@@ -107,6 +108,20 @@ class MarketTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 validate(q, history(), NOW)
 
+    def test_provider_excludes_open_bar_and_observes_book_changes(self):
+        from datetime import datetime, timezone
+        ticker = dict(trade_id=99, time=datetime.fromtimestamp(NOW, timezone.utc).isoformat(),
+                      price='100', bid='99.9', ask='100.1')
+        rows = [[NOW,90,110,100,101,1], [NOW-DAY,90,110,100,100,1], [NOW-2*DAY,90,110,100,100,1]]
+        market = CoinbaseMarket()
+        updated = dict(ticker, bid='99.8')
+        with patch.object(market, '_get', side_effect=[ticker,rows,updated,rows]), patch('arena.market.time.time', return_value=NOW):
+            q1, candles = market.fetch()
+            q2, _ = market.fetch()
+        self.assertNotEqual(q1.id, q2.id)
+        self.assertEqual(len(candles),2)
+        self.assertEqual(candles[-1].time,NOW-DAY)
+
     def test_incomplete_gapped_and_stale_candles(self):
         for cs in [history()[:-3], history()[:-1]+[Candle(NOW, 100)],
                    history()[:20]+history()[21:], history()[:-1]+[Candle(NOW-DAY, -1)]]:
@@ -127,6 +142,14 @@ class StoreTests(unittest.TestCase):
     def enter(self):
         with patch('arena.engine.signal', return_value=('BUY', 'test entry')):
             self.store.cycle(quote(), history(), NOW)
+
+    def test_future_schema_is_not_silently_downgraded(self):
+        with self.store.connection() as db:
+            db.execute('PRAGMA user_version=2')
+        with self.assertRaises(RuntimeError):
+            Store(self.path)
+        with self.store.connection() as db:
+            self.assertEqual(db.execute('PRAGMA user_version').fetchone()[0],2)
 
     def test_reopen_restart_and_sell(self):
         self.enter()
@@ -213,7 +236,7 @@ class BacktestTests(unittest.TestCase):
         report = json.loads((root/'data/backtest.json').read_text())
         with (root/'data/btc_daily.csv').open() as f:
             from datetime import datetime, timezone
-            rows = [(datetime.fromisoformat(r['date']).replace(tzinfo=timezone.utc).timestamp(), float(r['price'])) for r in __import__('csv').DictReader(f)]
+            rows = [(datetime.fromisoformat(r['date']).replace(tzinfo=timezone.utc).timestamp(), float(r['price'])) for r in csv.DictReader(f)]
         result = replay(rows)
         self.assertEqual(result['agents'], report['agents'])
         self.assertEqual(result['benchmark'], report['benchmark'])

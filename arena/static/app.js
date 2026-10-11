@@ -25,7 +25,7 @@ function renderAgents() {
     let position = 'Позиции нет. Средства в виртуальных USD.';
     if (p) {
       const current = system.quote?.bid;
-      const net = current ? p.qty*current*(1-.0005)*(1-.001) : null;
+      const net = current ? p.qty*current*(1-snapshot.slippage_rate)*(1-snapshot.fee_rate) : null;
       const pnl = net !== null ? net-p.cost : null;
       position = `<strong>${number(p.qty,6)} BTC</strong> · вход ${usd(p.entry)}<br>Стоп ${usd(p.stop)} · цель ${usd(p.take)}<br>Оценка P&amp;L: <span class="${tone(pnl)}">${usd(pnl)}</span> · открыта ${date(p.opened_at)}<br>По последнему bid с выходными издержками.`;
     }
