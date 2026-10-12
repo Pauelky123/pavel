@@ -1,3 +1,27 @@
+# Pavel · Paper Trading Arena
+
+Виртуальная торговая арена находится в пакете `arena`. Три независимые стратегии BTC-USD, постоянный worker, SQLite и интерфейс с проверяемыми результатами. Реальных торговых операций нет.
+
+```bash
+# Python 3.11+, pip-зависимости не требуются
+python -m unittest discover -s tests -v
+python -m arena.backtest
+# Два отдельных терминала/процесса, одна база runtime/arena.sqlite3:
+python -m arena.worker
+python -m arena.api
+# http://127.0.0.1:8000/
+```
+
+Для сервера: `docker compose up -d --build` (API и worker отдельно, постоянный volume). Полные инструкции и проверка HTTPS/24×7: [docs/OPERATIONS.md](docs/OPERATIONS.md). Решения и допущения: [docs/ASSUMPTIONS.md](docs/ASSUMPTIONS.md). Результаты проверки: [docs/PROGRESS.md](docs/PROGRESS.md).
+
+`GET /api/snapshot` — живая БД; `GET /api/backtest` — отдельная историческая модель; `/live` — API доступен; `/health` — свежий работающий цикл (503 при остановке). Браузер не управляет торговлей. При блокировке Coinbase worker ждёт и показывает ошибку.
+
+**Текущее состояние:** код проверен локально. Связь этого репозитория с arena.kpd100.site не подтверждена; production из данной среды не обновлён. В исходной версии отсутствовали код арены и развёртывание. История Coin Metrics используется только для бэктеста, не выдаётся за live-прибыль.
+
+## Архивная документация SavedBot
+
+Ниже сохранён исходный README другого приложения. Указанные в нём handlers, requirements и deployment-файлы отсутствовали в исходном checkout; команды SavedBot не являются инструкциями запуска арены.
+
 # SavedBot (Telegram Bot + Mini App)
 
 Production-ready MVP stack:

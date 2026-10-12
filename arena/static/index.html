@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101315">
+  <title>ARENA / Лаборатория торговых стратегий</title>
+  <link rel="stylesheet" href="/style.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Арена — главная"><span class="brand-mark">A<span>↗</span></span>ARENA<span class="brand-sub">STRATEGY LAB</span></a>
+    <nav aria-label="Разделы"><a href="#competition">Арена</a><a href="#agents">Агенты</a><a href="#system">Система</a></nav>
+    <span class="paper-tag"><span class="dot"></span> ВИРТУАЛЬНЫЕ СРЕДСТВА</span>
+  </header>
+  <main>
+    <section class="hero">
+      <div class="hero-copy"><p class="eyebrow"><span class="tiny-square"></span> ТРИ СТРАТЕГИИ. ОДИН РЫНОК.</p><h1>Рынок решает.<br><span>Данные показывают.</span></h1><p class="hero-description">Торговые агенты соревнуются на BTC. Разные подходы, ограниченный риск и открытый журнал каждого решения.</p><div class="hero-meta"><span>BTC / USD</span><span>SPOT · LONG</span><span>БЕЗ РЕАЛЬНЫХ ОРДЕРОВ</span></div></div>
+      <div class="arena-orbit" aria-hidden="true"><div class="orbit-ring ring-two"></div><div class="orbit-ring ring-one"></div><div class="orbit-core">₿<span>BTC / USD</span></div><span class="orbit-node node-vector">V</span><span class="orbit-node node-orbit">O</span><span class="orbit-node node-pulse">P</span><span class="orbit-label">ALWAYS ANALYZING / NEVER FORCING</span></div>
+    </section>
+    <div class="connection-strip" role="status" id="connection"><span class="dot"></span>Подключаемся к серверу…</div>
+    <section class="metrics" aria-label="Показатели арены">
+      <div class="metric"><span>Капитал арены <small>виртуальный</small></span><strong id="total-equity">—</strong><p id="total-return">Ожидаем данные сервера</p></div>
+      <div class="metric"><span>BTC / USD <small>последняя котировка</small></span><strong id="market-price">—</strong><p id="price-time">Нет котировки</p></div>
+      <div class="metric"><span>Открытые позиции</span><strong id="position-count">—</strong><p>У каждого агента свой лимит риска</p></div>
+      <div class="metric"><span>Завершённые сделки</span><strong id="trade-count">—</strong><p id="fee-total">Комиссии включены в результат</p></div>
+    </section>
+    <section class="competition-grid" id="competition">
+      <div class="panel chart-panel"><div class="panel-heading"><div><p class="eyebrow">ТРАЕКТОРИИ СТРАТЕГИЙ</p><h2>Капитал в движении</h2></div><div class="segmented" role="group" aria-label="Источник графика"><button id="live-tab" class="selected" aria-pressed="true">Арена</button><button id="history-tab" aria-pressed="false">Бэктест</button></div></div><div class="chart-tools"><span id="chart-context">Доходность от стартового капитала</span><select id="chart-period" aria-label="Период живого графика"><option value="all">Вся доступная история</option><option value="1">24 часа</option><option value="7">7 дней</option><option value="30">30 дней</option></select></div><div id="capital-chart" class="capital-chart" aria-live="polite"><div class="empty-state">Ожидаем сохранённые точки капитала</div></div><div id="chart-legend" class="chart-legend"></div><p class="chart-note" id="chart-note">Живой капитал берётся из SQLite. До первых наблюдений график пуст.</p></div>
+      <aside class="panel leaderboard"><div class="panel-heading"><div><p class="eyebrow">ТЕКУЩИЙ ЗАЧЁТ</p><h2>Рейтинг агентов</h2></div><span class="corner-symbol">↗</span></div><div id="ranking"><div class="empty-state">Рейтинг загружается</div></div><div class="ranking-footer"><span class="tiny-square"></span>По капиталу после издержек<br>По $10 000 на старте каждого агента</div></aside>
+    </section>
+    <section id="agents" class="agents-section"><div class="section-heading"><div><p class="eyebrow">НЕЗАВИСИМЫЕ ПОДХОДЫ</p><h2>Кто на арене</h2></div><span>Ожидание — тоже решение</span></div><div id="agent-cards" class="agent-grid"><div class="panel empty-state">Читаем состояния агентов…</div></div></section>
+    <section class="panel historical-panel" aria-labelledby="history-heading"><div class="panel-heading"><div><p class="eyebrow">ПРОВЕРКА НА ИСТОРИИ</p><h2 id="history-heading">Результат без обещаний</h2></div><span class="small-tag">COIN METRICS · DAILY</span></div><p id="history-description">Загружаем воспроизводимый бэктест…</p><div id="history-results" class="table-scroll"></div><details class="methodology"><summary>Как считали и что тест не проверяет</summary><div id="history-method"></div></details></section>
+    <section class="bottom-grid"><div class="panel trades-panel"><div class="panel-heading"><div><p class="eyebrow">ЖУРНАЛ ИСПОЛНЕНИЯ</p><h2>Лента сделок</h2></div><select id="trade-filter" aria-label="Фильтр сделок по агенту"><option value="all">Все агенты</option><option value="trend">VECTOR</option><option value="reversion">ORBIT</option><option value="breakout">PULSE</option></select></div><div class="table-scroll" id="trade-list"><div class="empty-state">Ждём данные журнала</div></div><p class="chart-note">Последние 100 исполнений. Время — Москва (UTC+3). P&amp;L при продаже включает обе комиссии.</p></div><aside class="panel system-panel" id="system"><div class="panel-heading"><div><p class="eyebrow">ОПЕРАЦИОННАЯ ПРОЗРАЧНОСТЬ</p><h2>Пульс системы</h2></div><span id="system-light" class="system-light"></span></div><dl id="system-details"><dt>Состояние</dt><dd>Загрузка…</dd></dl><div id="system-errors"></div><p class="chart-note">Worker работает отдельно от сайта. Статус «работает» требует свежей котировки и успешного серверного цикла.</p></aside></section>
+    <footer><span class="footer-brand">ARENA<span> / STRATEGY LAB</span></span><p>Только симуляция. Исторический результат не гарантирует будущую доходность.</p><a href="#system">Проверить систему ↗</a></footer>
+  </main>
+</body>
+</html>
