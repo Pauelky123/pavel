@@ -2,6 +2,10 @@
 
 Production arena.kpd100.site не проверен и не обновлён из этой среды: домен и Coinbase API блокируются прокси (403), серверные реквизиты не настроены. Следующие команды — конкретный план запуска на сервере с разрешённым доступом. Существующая инфраструктура неизвестна: сначала проверить её; не заменять сертификаты и конфигурацию вслепую.
 
+## Cloudflare Tunnel
+
+На скриншоте пользователя обнаружен Error 1033: сначала восстановить существующий cloudflared connector. Конкретные команды и Compose-overlay: [CLOUDFLARE_RECOVERY.md](CLOUDFLARE_RECOVERY.md).
+
 ## Перед запуском
 
 1. На сервере найти текущий vhost и сервис сайта (`nginx -T`, `docker compose ls`, `systemctl list-units --type=service`); проверить владельца проекта, порт 8000 и свободный локальный диск. Не запускать вторую копию на другом volume: это будет отдельная арена.
@@ -22,7 +26,7 @@ curl -fsS http://127.0.0.1:8000/live
 curl -fsS http://127.0.0.1:8000/health
 ```
 
-API и worker — разные контейнеры с `restart: unless-stopped`, один `arena-data` volume. Команда `docker compose down` сохраняет volume; **не использовать `down -v`**, она удаляет всю историю. API `/live` — liveness, `/health` — readiness всего цикла и отвечает 503 при stale/offline/error. Worker healthcheck проверяет readiness БД. Docker НЕ перезапускает контейнер только из-за unhealthy: нужна тревога внешнего мониторинга на `/health`, а restart policy реагирует на завершение процесса. Потоки запросов ограничены timeout, retry продолжаются при сетевых сбоях.
+API и worker — разные контейнеры с `restart: unless-stopped`, один `arena-data` volume. Команда `docker compose down` сохраняет volume; **не использовать `down -v`**, она удаляет всю историю. API `/live` — liveness, `/health` — readiness всего цикла и отвечает 503 при stale/offline/error. Worker healthcheck проверяет readiness БД. Worker watchdog завершает процесс при отсутствии прогресса более 150с, после чего restart policy его восстанавливает. Обычные сетевые ошибки с работающими retry не вызывают перезапуск. Docker НЕ перезапускает контейнер только из-за unhealthy: нужна тревога внешнего мониторинга на `/health`, а restart policy реагирует на завершение процесса. Потоки запросов ограничены timeout, retry продолжаются при сетевых сбоях.
 
 Проверить конкретный cycle перед объявлением запуска:
 

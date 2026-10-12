@@ -26,6 +26,7 @@ jobs:
         run: |
           node --check arena/static/app.js
           docker compose config --quiet
+          TUNNEL_TOKEN=validation-only-not-a-credential docker compose -f compose.yaml -f deploy/compose.tunnel.yaml config --quiet
       - name: Browser dependencies (test only)
         run: |
           pip install playwright==1.58.0

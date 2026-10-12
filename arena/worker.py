@@ -8,16 +8,18 @@ import time
 import uuid
 from .market import CoinbaseMarket
 from .store import Store
+from .watchdog import Watchdog
 
 log = logging.getLogger('arena.worker')
 
 
 class Worker:
-    def __init__(self, store=None, market=None, clock=time.time, rng=random.random):
+    def __init__(self, store=None, market=None, clock=time.time, rng=random.random, watchdog=None):
         self.store = store or Store()
         self.market = market or CoinbaseMarket()
         self.clock = clock
         self.rng = rng
+        self.watchdog = watchdog
         self.owner = str(uuid.uuid4())
         self.failures = 0
         self.started = False
@@ -50,11 +52,15 @@ class Worker:
     def run(self):
         try:
             while not self.stop.is_set():
+                if self.watchdog:
+                    self.watchdog.touch()
                 try:
                     delay = self.step()
                 except Exception:
                     log.exception('Worker/storage failure; retry in 10s')
                     delay = 10
+                if self.watchdog:
+                    self.watchdog.touch()
                 self.stop.wait(delay)
         finally:
             self.store.release(self.owner)
@@ -62,10 +68,15 @@ class Worker:
 
 def main():
     logging.basicConfig(level=os.environ.get('LOG_LEVEL', 'INFO'), format='%(asctime)s %(levelname)s %(message)s')
-    worker = Worker()
+    watchdog = Watchdog()
+    worker = Worker(watchdog=watchdog)
     for sig in (signal.SIGINT, signal.SIGTERM):
         signal.signal(sig, lambda *_: worker.stop.set())
-    worker.run()
+    watchdog.start()
+    try:
+        worker.run()
+    finally:
+        watchdog.close()
 
 
 if __name__ == '__main__':
